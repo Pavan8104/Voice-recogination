@@ -1,15 +1,49 @@
-# Voice-recogination
-Introduction:
-I recently implemented a very basic text-to-speech program with the help of Python. The application was such that it would take some text as input and then convert into spoken words. During this project, I got several hard times, but at the same time, I also learned many things about the issues with Python libraries, the handling of errors, etc.
+import os
+import pyttsx3
+import speech_recognition as sr
+import pyautogui
 
-Challenges Faced:
+# Initialize the speech recognition engine
+recognizer = sr.Recognizer()
 
-SSL Warnings with urllib3: One major problem arose when I started making HTTP requests using the urllib3 library. The system was throwing several warnings about SSL incompatibility. This cluttered my output and I was supposed to handle it.
-Initializing pyttsx3: Integrating the pyttsx3 library for text-to-speech was much harder than expected. I got some issues with initialization of the driver and handling of missing modules.
-Libraries Used:
+def speak(text):
+    engine = pyttsx3.init(driverName='nsss')  # Specify the driverName as 'nsss'
+    engine.say(text)
+    engine.runAndWait()
 
-urllib3: This library was actually critical for making HTTP requests and fixing SSL warnings. I could apply urllib3.disable_warnings(urllib3.exceptions.NotOpenSSLWarning) and suppress SSL warnings from showing up in my output.
-pyttsx3: pyttsx3 is a very powerful library for text-to-speech conversion. Despite the initialization issues, it provided core functionality for text to spoken-word conversion.
-Conclusion:
-In general, it was an amazing learning experience. I was able to fix SSL warnings and initialization issues with the libraries and now understand how to use Python libraries to build a simple application.
+def listen():
+    with sr.Microphone() as source:
+        print("Listening...")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
 
+    try:s
+        print("Recognizing...")
+        query = recognizer.recognize_google(audio)
+        print("You said:", query)
+        return query.lower()
+    except sr.UnknownValueError:
+        print("Sorry, I couldn't understand what you said.")
+        return ""
+    except sr.RequestError as e:
+        print("Could not request results from Google Speech Recognition service; {0}".format(e))
+        return ""
+
+def main():
+    while True:
+        # Listen for user input
+        command = listen()
+
+        # Perform actions based on user input
+        if "type" in command:
+            speak("What do you want me to type?")
+            text_to_type = listen()
+            pyautogui.typewrite(text_to_type)
+        elif "exit" in command:
+            speak("Goodbye!")
+            break
+        else:
+            speak("Sorry, I didn't understand that command.")
+
+if __name__ == "__main__":
+    main()
